@@ -6,8 +6,16 @@ const router = express.Router();
 // GET - Obtener todos los usuarios
 router.get('/', async (req, res) => {
   try {
-    const users = await prisma.user.findMany();
-    res.json(users);
+    const usuarios = await prisma.usuario.findMany({
+      select: {
+        id: true,
+        nombre: true,
+        correo: true,
+        rol: true,
+        creadoEn: true
+      }
+    });
+    res.json(usuarios);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -17,15 +25,22 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await prisma.user.findUnique({
+    const usuario = await prisma.usuario.findUnique({
       where: { id: parseInt(id) },
+      select: {
+        id: true,
+        nombre: true,
+        correo: true,
+        rol: true,
+        creadoEn: true
+      }
     });
     
-    if (!user) {
+    if (!usuario) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
     
-    res.json(user);
+    res.json(usuario);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -34,11 +49,18 @@ router.get('/:id', async (req, res) => {
 // POST - Crear un nuevo usuario
 router.post('/', async (req, res) => {
   try {
-    const { email, name } = req.body;
-    const user = await prisma.user.create({
-      data: { email, name },
+    const { nombre, correo, contrasena, rol } = req.body;
+    const usuario = await prisma.usuario.create({
+      data: { nombre, correo, contrasena, rol },
+      select: {
+        id: true,
+        nombre: true,
+        correo: true,
+        rol: true,
+        creadoEn: true
+      }
     });
-    res.status(201).json(user);
+    res.status(201).json(usuario);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -48,12 +70,19 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { email, name } = req.body;
-    const user = await prisma.user.update({
+    const { nombre, correo, contrasena, rol } = req.body;
+    const usuario = await prisma.usuario.update({
       where: { id: parseInt(id) },
-      data: { email, name },
+      data: { nombre, correo, contrasena, rol },
+      select: {
+        id: true,
+        nombre: true,
+        correo: true,
+        rol: true,
+        creadoEn: true
+      }
     });
-    res.json(user);
+    res.json(usuario);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -63,7 +92,7 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    await prisma.user.delete({
+    await prisma.usuario.delete({
       where: { id: parseInt(id) },
     });
     res.status(204).send();

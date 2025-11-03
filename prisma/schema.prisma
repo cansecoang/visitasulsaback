@@ -10,11 +10,76 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Modelo de ejemplo - User
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// Enums
+enum RolUsuario {
+  admin_sistema
+  admin_universitario
+
+  @@map("rol_usuario")
+}
+
+enum MedioIngreso {
+  peatonal
+  vehicular
+
+  @@map("medio_ingreso")
+}
+
+enum EstadoCita {
+  programada
+  reagendada
+  finalizada
+
+  @@map("estado_cita")
+}
+
+// Tabla de usuarios (administradores)
+model Usuario {
+  id         Int         @id @default(autoincrement())
+  nombre     String      @db.VarChar(100)
+  correo     String      @unique @db.VarChar(100)
+  contrasena String      @db.VarChar(255)
+  rol        RolUsuario
+  creadoEn   DateTime    @default(now()) @map("creado_en")
+  citas      Cita[]
+
+  @@map("usuarios")
+}
+
+// Tabla de visitantes
+model Visitante {
+  id               Int       @id @default(autoincrement())
+  nombre           String    @db.VarChar(100)
+  genero           String?   @db.VarChar(10)
+  fechaNacimiento  DateTime? @map("fecha_nacimiento") @db.Date
+  correo           String?   @db.VarChar(100)
+  telefono         String?   @db.VarChar(20)
+  ine              String?   @db.VarChar(20)
+  creadoEn         DateTime  @default(now()) @map("creado_en")
+  citas            Cita[]
+
+  @@map("visitantes")
+}
+
+// Tabla de citas (relación entre visitante y usuario)
+model Cita {
+  id                Int           @id @default(autoincrement())
+  visitanteId       Int           @map("visitante_id")
+  usuarioId         Int?          @map("usuario_id")
+  fecha             DateTime      @db.Date
+  hora              DateTime      @db.Time
+  personaAVisitar   String        @map("persona_a_visitar") @db.VarChar(100)
+  area              String?       @db.VarChar(100)
+  medioIngreso      MedioIngreso? @map("medio_ingreso")
+  marcaVehiculo     String?       @map("marca_vehiculo") @db.VarChar(50)
+  modeloVehiculo    String?       @map("modelo_vehiculo") @db.VarChar(50)
+  colorVehiculo     String?       @map("color_vehiculo") @db.VarChar(30)
+  placasVehiculo    String?       @map("placas_vehiculo") @db.VarChar(20)
+  estado            EstadoCita    @default(programada)
+  creadoEn          DateTime      @default(now()) @map("creado_en")
+  
+  visitante         Visitante     @relation(fields: [visitanteId], references: [id], onDelete: Cascade)
+  usuario           Usuario?      @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+
+  @@map("citas")
 }

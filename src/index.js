@@ -1,7 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import userRoutes from './routes/users.routes.js';
+import usuariosRoutes from './routes/usuarios.routes.js';
+import visitantesRoutes from './routes/visitantes.routes.js';
+import citasRoutes from './routes/citas.routes.js';
 
 dotenv.config();
 
@@ -15,7 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Rutas básicas
 app.get('/', (req, res) => {
-  res.json({ message: 'Backend con Express y Prisma funcionando!' });
+  res.json({ message: 'API Sistema de Visitas ULSA - Backend funcionando!' });
 });
 
 app.get('/health', (req, res) => {
@@ -23,7 +25,9 @@ app.get('/health', (req, res) => {
 });
 
 // Rutas de API
-app.use('/api/users', userRoutes);
+app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/visitantes', visitantesRoutes);
+app.use('/api/citas', citasRoutes);
 
 // Manejo de errores
 app.use((err, req, res, next) => {
